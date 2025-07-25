@@ -1,0 +1,24 @@
+venv/
+delete/
+# Python
+__pycache__/
+*.pyc
+*.pyd
+*.egg-info/
+.pytest_cache/
+
+# Environment variables
+.env
+.flaskenv
+
+# Logs and databases
+*.log
+*.sqlite3
+
+# OS generated files
+.DS_Store
+thumbs.db
+
+# IDE specific files
+.vscode/
+.idea/ 

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Vision Control Panel</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        body {
+            padding-top: 50px;
+            background-color: #f8f9fa;
+        }
+        .image-feed-container, .settings-panel {
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            background-color: #ffffff;
+            border-radius: .25rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            margin-bottom: 20px;
+        }
+        .image-feed-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border-radius: .25rem;
+        }
+        .container {
+            max-width: 960px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4 text-center">AI Vision Control Panel</h1>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="image-feed-container">
+                    <h2 class="h4 mb-3">Live Camera Feed</h2>
+                    <!-- This is where you would display the live video feed from your camera/vision service -->
+                    <img src="/static/placeholder_camera.jpg" alt="Live Camera Feed" class="img-fluid mb-3">
+                    <p class="text-muted">Image from camera will appear here. (Currently a placeholder)</p>
+                </div>
+                <!-- Upload Image for Model Processing -->
+                <div class="image-feed-container mt-4">
+                    <h2 class="h5 mb-3">Upload Image for AI Processing</h2>
+                    <form id="uploadForm" enctype="multipart/form-data" method="post" action="/upload/image">
+                        <div class="mb-3">
+                            <input class="form-control" type="file" id="imageFile" name="file" accept="image/*" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Upload & Process</button>
+                    </form>
+                    <div id="uploadStatus" class="mt-2 text-success" style="display:none;"></div>
+                </div>
+                <script>
+                    // Optional: AJAX upload for better UX
+                    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        var formData = new FormData(this);
+                        var statusDiv = document.getElementById('uploadStatus');
+                        statusDiv.style.display = 'none';
+                        fetch('/upload/image', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            statusDiv.textContent = data.status || 'Upload complete';
+                            statusDiv.style.display = 'block';
+                        })
+                        .catch(error => {
+                            statusDiv.textContent = 'Upload failed';
+                            statusDiv.style.display = 'block';
+                        });
+                    });
+                </script>
+            </div>
+
+            <div class="col-md-4">
+                <div class="settings-panel">
+                    <h2 class="h4 mb-3">AI Settings</h2>
+                    <!-- This is where you would add controls for your AI services -->
+                    <form>
+                        <div class="mb-3">
+                            <label for="detectionThreshold" class="form-label">Detection Threshold</label>
+                            <input type="range" class="form-range" id="detectionThreshold" min="0" max="1" step="0.05">
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="enableAnalytics">
+                            <label class="form-check-label" for="enableAnalytics">
+                                Enable Analytics
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-success">Apply Settings</button>
+                    </form>
+                    <p class="text-muted mt-3">Configure your AI vision parameters here.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="image-feed-container">
+                    <h2 class="h4 mb-3">Processed Output</h2>
+                    <!-- This is where you would display the processed output from your AI model -->
+                    <img src="/static/placeholder_processed.jpg" alt="Processed Output" class="img-fluid mb-3">
+                    <p class="text-muted">Processed image/video from AI will appear here. (Currently a placeholder)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html> 
