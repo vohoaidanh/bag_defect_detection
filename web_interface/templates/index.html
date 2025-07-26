@@ -42,6 +42,8 @@
                     <!-- This is where you would display the live video feed from your camera/vision service -->
                     <img src="/static/placeholder_camera.jpg" alt="Live Camera Feed" class="img-fluid mb-3">
                     <p class="text-muted">Image from camera will appear here. (Currently a placeholder)</p>
+                    <button id="captureButton" class="btn btn-info mt-2">Capture Image</button>
+                    <div id="captureStatus" class="mt-2 text-info" style="display:none;"></div>
                 </div>
                 <!-- Upload Image for Model Processing -->
                 <div class="image-feed-container mt-4">
@@ -73,6 +75,36 @@
                         .catch(error => {
                             statusDiv.textContent = 'Upload failed';
                             statusDiv.style.display = 'block';
+                        });
+                    });
+
+                    // Capture button functionality
+                    document.getElementById('captureButton').addEventListener('click', function() {
+                        var captureStatusDiv = document.getElementById('captureStatus');
+                        captureStatusDiv.style.display = 'none'; // Hide previous status
+                        captureStatusDiv.textContent = 'Sending capture command...';
+                        captureStatusDiv.style.display = 'block';
+
+                        fetch('/camera/capture', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                captureStatusDiv.textContent = data.message; // Display success message
+                                captureStatusDiv.className = 'mt-2 text-success';
+                            } else {
+                                captureStatusDiv.textContent = data.detail || 'Capture failed.';
+                                captureStatusDiv.className = 'mt-2 text-danger';
+                            }
+                        })
+                        .catch(error => {
+                            captureStatusDiv.textContent = 'Error sending capture command.';
+                            captureStatusDiv.className = 'mt-2 text-danger';
+                            console.error('Error:', error);
                         });
                     });
                 </script>

@@ -24,7 +24,7 @@ class CameraController:
         
         self._initialized = True
         self.image_queue = image_queue
-        self.stop_trigger = False
+        self.stop_trigger = True
         self.map = None
         ic4.Library.init()
         self.listener = Listener(image_queue=self.image_queue)
@@ -104,12 +104,20 @@ class CameraController:
     def trigger_loop(self):
         while not self.stop_trigger:
             try:
-                if self.grabber.is_streaming:
+                if self.grabber.is_device_open:
                     self.grabber.device_property_map.execute_command(ic4.PropId.TRIGGER_SOFTWARE)
                     print("Trigger sent.")
             except Exception as e:
                 print("Trigger error:", e)
             time.sleep(3)  # Đợi 3 giây
+
+    def capture(self):
+        try:
+            self.grabber.device_property_map.execute_command(ic4.PropId.TRIGGER_SOFTWARE)
+            print("Trigger sent.")
+            return True
+        except:
+            return False
 
 
 
