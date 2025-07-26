@@ -22,7 +22,7 @@ class CameraController:
         
         self._initialized = True
         self.image_queue = image_queue
-        self.stop_trigger = False
+        self.stop_trigger = True
         ic4.Library.init()
         self.listener = Listener(image_queue=self.image_queue)
         self.sink = ic4.QueueSink(self.listener)
@@ -72,9 +72,9 @@ class CameraController:
         if self.grabber.is_device_open:
             # self.grabber.device_property_map.set_value(ic4.PropId.WIDTH, 2592)
             # self.grabber.device_property_map.set_value(ic4.PropId.HEIGHT, 1944)
-            self.grabber.device_property_map.try_set_value(ic4.PropId.PIXEL_FORMAT, ic4.PixelFormat.BayerGR16)
+            self.grabber.device_property_map.try_set_value(ic4.PropId.PIXEL_FORMAT, ic4.PixelFormat.BayerGR8)
             self.grabber.device_property_map.set_value(ic4.PropId.EXPOSURE_AUTO, "Off")
-            self.grabber.device_property_map.set_value(ic4.PropId.EXPOSURE_TIME, 300)
+            self.grabber.device_property_map.set_value(ic4.PropId.EXPOSURE_TIME, 1000)
             # self.grabber.device_property_map.try_set_value(ic4.PropId.USER_SET_SELECTOR, "Default")
             self.grabber.device_property_map.set_value(ic4.PropId.TRIGGER_MODE, "On")
             print(self.grabber.device_property_map)
@@ -108,7 +108,16 @@ class CameraController:
                 print("Trigger error:", e)
             time.sleep(3)  # Đợi 3 giây
 
+    def capture(self):
+        try:
+            self.grabber.device_property_map.execute_command(ic4.PropId.TRIGGER_SOFTWARE)
+            print("Trigger sent.")
+            return True
+        except:
+            return False
+        
 
+        
 if __name__=="__main__":
     print("camera starting")
     camera_controller = CameraController()

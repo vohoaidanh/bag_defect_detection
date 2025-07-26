@@ -13,7 +13,7 @@ from services import detection_result_handler
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
-    trigger_queue = queue.Queue(maxsize=10)
+    trigger_queue = queue.Queue(maxsize=1)
     image_queue = queue.Queue(maxsize=2)
     result_queue = queue.Queue(maxsize=2)
     last_result_queue = queue.Queue(maxsize=1)

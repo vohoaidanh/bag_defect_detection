@@ -5,6 +5,7 @@ import queue
 import time
 from fastapi import FastAPI, UploadFile, File, Request
 from web_interface.routes.upload import upload_router
+from web_interface.routes.camera import camera_router
 
 from contextlib import asynccontextmanager
 
@@ -37,6 +38,7 @@ async def control_panel(request: Request):
 
 
 app.include_router(upload_router, prefix="/upload")
+app.include_router(camera_router, prefix="/camera")
 
 
 

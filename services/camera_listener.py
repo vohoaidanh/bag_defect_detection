@@ -22,20 +22,14 @@ class Listener(ic4.QueueSinkListener):
         buffer = sink.pop_output_buffer()
         self.counter+=1
 
-	    # Save the image buffer's contents in a BMP file
-        #home_dir = "/home/vision/projects/images"
-        #file_name = os.path.join(home_dir, f"{self.counter}.bmp")
-        #buffer.save_as_png(file_name)
-           
-        print(buffer.image_type)
         # Lấy ảnh dưới dạng numpy array
         image = buffer.numpy_wrap()  # dạng numpy.ndarray RGB (H, W, 3)
         image = cv2.cvtColor(image, cv2.COLOR_BayerGR2RGB)
-        print(image.shape)
+        # print(image.shape)
 
-        # home_dir = "/home/vision/projects/images"
-        # file_name = os.path.join(home_dir, f"{self.counter}.png")
-        # cv2.imwrite(file_name, image)
+        home_dir = "/home/vision/projects/images"
+        file_name = os.path.join(home_dir, f"{self.counter}.png")
+        cv2.imwrite(file_name, image)
 
         image = ImageWithMeta(image)
 
