@@ -29,7 +29,8 @@ class Listener(ic4.QueueSinkListener):
         print(buffer.image_type)
         # Lấy ảnh dưới dạng numpy array
         image = buffer.numpy_wrap()  # dạng numpy.ndarray RGB (H, W, 3)
-        image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+        print(image.shape)
+        # image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
         image = ImageWithMeta(image)
 
         # Đưa ảnh vào hàng đợi để xử lý YOLO
