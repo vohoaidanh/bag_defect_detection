@@ -1,4 +1,4 @@
-# main.py
+#!/home/vision/projects/defect_detection/venv/bin/python
 import sys
 import os
 import queue

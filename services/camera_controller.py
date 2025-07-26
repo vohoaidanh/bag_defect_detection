@@ -1,9 +1,10 @@
 import imagingcontrol4 as ic4
 import threading
 import time
-from camera_listener import Listener
+from services.camera_listener import Listener
 # from yolo_processor import YoloProcessor
 import queue
+
 
 class CameraController:
     _instance = None
@@ -23,9 +24,12 @@ class CameraController:
         
         self._initialized = True
         self.image_queue = image_queue
+        self.stop_trigger = False
+        self.map = None
         ic4.Library.init()
         self.listener = Listener(image_queue=self.image_queue)
         self.sink = ic4.QueueSink(self.listener)
+        # self.sink = ic4.SnapSink(self.listener)
   
         self.grabber = ic4.Grabber()
         self.devices = None
@@ -35,12 +39,21 @@ class CameraController:
         self.monitor_thread = threading.Thread(target=self._monitor_camera, daemon=True)
         self.monitor_thread.start()
 
+        # Trigger thread
+        self.trigger_loop_thread = threading.Thread(target=self.trigger_loop, daemon=True)
+        self.trigger_loop_thread.start()
+
     def _connect_camera(self):
         self.devices = ic4.DeviceEnum.devices()
+        print("Devices are: ",self.devices)
         if self.devices:
             try:
                 self.grabber.device_open(self.devices[0])
                 print("Camera connected.")
+                self.grabber.stream_setup(self.sink)
+                print("Setup data stream from the video capture device to the sink.")
+                
+ 
             except Exception as e:
                 print("Failed to open camera:", e)
         else:
@@ -56,7 +69,7 @@ class CameraController:
                 print("Error checking camera state:", e)
             time.sleep(5)  # check every 5 seconds
 
-    def set_exposure(self, value: float = 5000.0):
+    def set_exposure(self, value: float = 1000.0):
         if self.grabber.is_device_open:
             # Configure the exposure time to 5ms (5000µs)
             self.grabber.device_property_map.set_value(ic4.PropId.EXPOSURE_AUTO, "Off")
@@ -87,9 +100,20 @@ class CameraController:
 
         print("Camera and processing thread stopped.")
 
+    # Hàm gửi trigger
+    def trigger_loop(self):
+        while not self.stop_trigger:
+            try:
+                if self.grabber.is_streaming:
+                    self.grabber.device_property_map.execute_command(ic4.PropId.TRIGGER_SOFTWARE)
+                    print("Trigger sent.")
+            except Exception as e:
+                print("Trigger error:", e)
+            time.sleep(0.3)  # Đợi 3 giây
 
 
 
 if __name__=="__main__":
     print("camera starting")
     camera_controller = CameraController()
+
