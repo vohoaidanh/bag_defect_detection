@@ -70,11 +70,11 @@ class CameraController:
  
     def set_default_camera_settings(self):
         if self.grabber.is_device_open:
-            self.grabber.device_property_map.set_value(ic4.PropId.WIDTH, 640)
-            self.grabber.device_property_map.set_value(ic4.PropId.HEIGHT, 480)
-            self.grabber.device_property_map.try_set_value(ic4.PropId.PIXEL_FORMAT, ic4.PixelFormat.BGR8)
+            # self.grabber.device_property_map.set_value(ic4.PropId.WIDTH, 2592)
+            # self.grabber.device_property_map.set_value(ic4.PropId.HEIGHT, 1944)
+            self.grabber.device_property_map.try_set_value(ic4.PropId.PIXEL_FORMAT, ic4.PixelFormat.BayerGR16)
             self.grabber.device_property_map.set_value(ic4.PropId.EXPOSURE_AUTO, "Off")
-            self.grabber.device_property_map.set_value(ic4.PropId.EXPOSURE_TIME, 1000)
+            self.grabber.device_property_map.set_value(ic4.PropId.EXPOSURE_TIME, 300)
             # self.grabber.device_property_map.try_set_value(ic4.PropId.USER_SET_SELECTOR, "Default")
             self.grabber.device_property_map.set_value(ic4.PropId.TRIGGER_MODE, "On")
             print(self.grabber.device_property_map)
@@ -107,7 +107,6 @@ class CameraController:
             except Exception as e:
                 print("Trigger error:", e)
             time.sleep(3)  # Đợi 3 giây
-
 
 
 if __name__=="__main__":

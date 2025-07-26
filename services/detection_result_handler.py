@@ -63,6 +63,7 @@ class DetectionResultHandler:
                     delay = self.removal_queue.get()
                     delay = delay - 1
                     if delay <= 0:
+                        print("---------------Remove bag---------------")
                         self._activate_removal()
                     else:
                         new_queue.put(delay)
@@ -73,5 +74,5 @@ class DetectionResultHandler:
 
     def _activate_removal(self):
         #TODO add trigger to Harware ditital output
-        self.actuator.send_trigger(coil_addresses=5, pulse_time=0.3)
+        # self.actuator.send_trigger(coil_addresses=5, pulse_time=0.3)
         print("[Handler] --> Activate reject actuator!")

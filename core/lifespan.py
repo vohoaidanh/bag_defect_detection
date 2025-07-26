@@ -19,13 +19,14 @@ async def lifespan(app: FastAPI):
     last_result_queue = queue.Queue(maxsize=1)
 
     camera_controller = CameraController(image_queue=image_queue)
-    detector = YoloProcessor(image_queue=image_queue, result_queue=result_queue)
+    detector = YoloProcessor(image_queue=image_queue, result_queue=result_queue, trigger_queue=trigger_queue)
     detection_hander = DetectionResultHandler(
         result_queue=result_queue,
         trigger_queue=trigger_queue,
         actuator=ModbusActuator("192.168.1.100"),
         n_delay=3
     )
+    detection_hander.start()
 
     app.state.camera_controller = camera_controller
     app.state.detector = detector

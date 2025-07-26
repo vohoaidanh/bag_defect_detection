@@ -3,6 +3,8 @@ import queue
 import os
 from shared.image_data import ImageWithMeta
 import cv2
+import time
+
 
 q = queue.Queue()
 
@@ -18,7 +20,6 @@ class Listener(ic4.QueueSinkListener):
     def frames_queued(self, sink: ic4.QueueSink):
         # Lấy buffer ảnh
         buffer = sink.pop_output_buffer()
-        
         self.counter+=1
 
 	    # Save the image buffer's contents in a BMP file
@@ -29,8 +30,13 @@ class Listener(ic4.QueueSinkListener):
         print(buffer.image_type)
         # Lấy ảnh dưới dạng numpy array
         image = buffer.numpy_wrap()  # dạng numpy.ndarray RGB (H, W, 3)
+        image = cv2.cvtColor(image, cv2.COLOR_BayerGR2RGB)
         print(image.shape)
-        # image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+
+        # home_dir = "/home/vision/projects/images"
+        # file_name = os.path.join(home_dir, f"{self.counter}.png")
+        # cv2.imwrite(file_name, image)
+
         image = ImageWithMeta(image)
 
         # Đưa ảnh vào hàng đợi để xử lý YOLO
