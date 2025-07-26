@@ -8,3 +8,4 @@ pip install uvicorn
 pip install opencv-python
 pip install pymodbus
 pip install pydantic-settings
+pip install python-multipart

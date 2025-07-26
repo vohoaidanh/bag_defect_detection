@@ -2,9 +2,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 import queue
 
-
-# from services.camera_controller import CameraController
-from services.camera_simulate import CameraSimulator as CameraController
+from services.camera_controller import CameraController
+# from services.camera_simulate import CameraSimulator as CameraController
 from services.yolo_processor import YoloProcessor
 from services.detection_result_handler import DetectionResultHandler
 from services.hardware.modbus_io import ModbusActuator
