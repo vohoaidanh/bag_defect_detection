@@ -3,8 +3,6 @@ import threading
 import time
 from services.camera_listener import Listener
 # from yolo_processor import YoloProcessor
-import queue
-
 
 class CameraController:
     _instance = None
@@ -25,7 +23,6 @@ class CameraController:
         self._initialized = True
         self.image_queue = image_queue
         self.stop_trigger = True
-        self.map = None
         ic4.Library.init()
         self.listener = Listener(image_queue=self.image_queue)
         self.sink = ic4.QueueSink(self.listener)
@@ -50,6 +47,7 @@ class CameraController:
             try:
                 self.grabber.device_open(self.devices[0])
                 print("Camera connected.")
+                self.set_default_camera_settings()
                 self.grabber.stream_setup(self.sink)
                 print("Setup data stream from the video capture device to the sink.")
                 
@@ -69,22 +67,18 @@ class CameraController:
                 print("Error checking camera state:", e)
             time.sleep(5)  # check every 5 seconds
 
-    def set_exposure(self, value: float = 1000.0):
+ 
+    def set_default_camera_settings(self):
         if self.grabber.is_device_open:
-            # Configure the exposure time to 5ms (5000µs)
+            # self.grabber.device_property_map.set_value(ic4.PropId.WIDTH, 2592)
+            # self.grabber.device_property_map.set_value(ic4.PropId.HEIGHT, 1944)
+            self.grabber.device_property_map.try_set_value(ic4.PropId.PIXEL_FORMAT, ic4.PixelFormat.BayerGR8)
             self.grabber.device_property_map.set_value(ic4.PropId.EXPOSURE_AUTO, "Off")
-            self.grabber.device_property_map.set_value(ic4.PropId.EXPOSURE_TIME, value)
+            self.grabber.device_property_map.set_value(ic4.PropId.EXPOSURE_TIME, 1000)
+            # self.grabber.device_property_map.try_set_value(ic4.PropId.USER_SET_SELECTOR, "Default")
+            self.grabber.device_property_map.set_value(ic4.PropId.TRIGGER_MODE, "On")
+            print(self.grabber.device_property_map)
 
-
-    def get_exposure(self) -> float:
-        if self.grabber.is_device_open:
-            return self.grabber.get_value_float(ic4.PropId.EXPOSURE_TIME)
-        return -1.0
-
-    def set_resolution(self, width:int, height:int):
-        if not self.grabber.is_device_open:
-            self.grabber.device_property_map.set_value(ic4.PropId.WIDTH, width)
-            self.grabber.device_property_map.set_value(ic4.PropId.HEIGHT, height)
 
 
     def stop(self):
@@ -97,6 +91,9 @@ class CameraController:
         # 3. Giải phóng thiết bị nếu cần
         if self.grabber.is_device_open:
             self.grabber.device_close()
+
+        if not self.stop_trigger:
+            self.stop_trigger =  True
 
         print("Camera and processing thread stopped.")
 
@@ -118,9 +115,9 @@ class CameraController:
             return True
         except:
             return False
+        
 
-
-
+        
 if __name__=="__main__":
     print("camera starting")
     camera_controller = CameraController()

@@ -22,13 +22,13 @@ class YoloProcessor:
                     cls._instance = super(YoloProcessor, cls).__new__(cls)
         return cls._instance
 
-    def __init__(self, image_queue: queue.Queue, result_queue: queue.Queue):
+    def __init__(self, image_queue: queue.Queue, result_queue: queue.Queue, trigger_queue: queue.Queue):
         if hasattr(self, "_initialized") and self._initialized:
             return  # Không khởi tạo lại nếu đã init rồi
 
         self.image_queue = image_queue
         self.result_queue = result_queue
-
+        self.trigger_queue = trigger_queue
         self.model = YoloDetector(model_path=settings.MODEL_PATH)
         self.running = True
         self.thread = threading.Thread(target=self._run, daemon=True)
@@ -50,6 +50,7 @@ class YoloProcessor:
                 detection_result: DetectionResult = parse_yolo_result(result)
                 detection_result.id = data_input.id
                 safe_queue_put(self.result_queue, detection_result, DetectionResult)
+                safe_queue_put(self.trigger_queue, True, type(True))
                 # for r in results:
                 #     print("Detected boxes:", r.boxes.xyxy)
 

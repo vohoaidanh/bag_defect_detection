@@ -16,11 +16,17 @@ class DetectionResult:
 
 
     def is_defect(self, threshold, target_labels=None) -> bool:
-        if target_labels is None:
-            target_labels = ["defect"]  # hoặc danh sách label lỗi
+
+        # if target_labels is None:
+        #     target_labels = ["defect"]  # hoặc danh sách label lỗi
+
+        # return any(
+        #     det.confidence > threshold and det.label in target_labels
+        #     for det in self.detections
+        # )
 
         return any(
-            det.confidence > threshold and det.label in target_labels
-            for det in self.detections
+            det.confidence > threshold for det in self.detections
         )
+
 

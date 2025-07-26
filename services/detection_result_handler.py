@@ -41,7 +41,7 @@ class DetectionResultHandler:
         while self.running:
             try:
                 result: DetectionResult = self.result_queue.get(timeout=0.1)
-                if result.is_defect:
+                if result.is_defect(threshold=0.5):
                     print(f"[DetectionResultHandler] Detected defect, scheduling removal after {self.n_delay} triggers.")
                     self.removal_queue.put(self.n_delay)
             except queue.Empty:
@@ -55,7 +55,7 @@ class DetectionResultHandler:
         """
         while self.running:
             try:
-                _ = self.trigger_queue.get(timeout=0.1)
+                _ = self.trigger_queue.get(timeout=0.05)
 
                 # Cập nhật delay cho từng phần tử trong hàng đợi
                 new_queue = queue.Queue()
@@ -63,6 +63,7 @@ class DetectionResultHandler:
                     delay = self.removal_queue.get()
                     delay = delay - 1
                     if delay <= 0:
+                        print("---------------Remove bag---------------")
                         self._activate_removal()
                     else:
                         new_queue.put(delay)
@@ -73,5 +74,5 @@ class DetectionResultHandler:
 
     def _activate_removal(self):
         #TODO add trigger to Harware ditital output
-        self.actuator.send_trigger(coil_addresses=5, pulse_time=0.3)
+        # self.actuator.send_trigger(coil_addresses=5, pulse_time=0.3)
         print("[Handler] --> Activate reject actuator!")
