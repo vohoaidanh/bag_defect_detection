@@ -23,11 +23,11 @@ class Listener(ic4.QueueSinkListener):
         self.counter+=1
 
 	    # Save the image buffer's contents in a BMP file
-        home_dir = "/home/vision/projects"
-        file_name = os.path.join(home_dir, f"{self.counter}.bmp")
-        buffer.save_as_png(file_name)
+        #home_dir = "/home/vision/projects/images"
+        #file_name = os.path.join(home_dir, f"{self.counter}.bmp")
+        #buffer.save_as_png(file_name)
            
-        
+        print(buffer.image_type)
         # Lấy ảnh dưới dạng numpy array
         image = buffer.numpy_wrap()  # dạng numpy.ndarray RGB (H, W, 3)
         image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
