@@ -6,6 +6,7 @@ from services.hardware.actuator_interface import ActuatorInterface
 from services.hardware.modbus_io import ModbusActuator
 from shared.events import SharedEvents, EventType
 from shared.pipeline_queue import PipelineQueues
+from core.config import settings
 
 
 class DetectionResultHandler:
@@ -44,7 +45,7 @@ class DetectionResultHandler:
         while self.running:
             try:
                 result: DetectionResult = self.result_queue.get_nowait()
-                if result.is_defect(threshold=0.5):
+                if result.is_defect(threshold=settings.CONFIDENCE_THRESHOLD):
                     print(f"[DetectionResultHandler] Detected defect, scheduling removal after {self.n_delay} triggers.")
                     self.removal_queue.put(self.n_delay)
             except queue.Empty:

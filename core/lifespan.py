@@ -30,14 +30,15 @@ async def lifespan(app: FastAPI):
         actuator=ModbusActuator("192.168.1.100"),
         n_delay=3
     )
+    
     detector.start()
     detection_hander.start()
 
     app.state.camera_controller = camera_controller
     app.state.detector = detector
     app.state.detection_hander = detection_hander
-    app.state.shared_queue = shared_queue  # để endpoint upload dùng được
-
+    app.state.shared_queue = shared_queue  
+    app.state.shared_event = shared_event
     yield
 
     print("Stopping camera thread...")

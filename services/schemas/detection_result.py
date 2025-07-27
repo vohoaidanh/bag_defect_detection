@@ -26,7 +26,7 @@ class DetectionResult:
         # )
 
         return any(
-            det.confidence > threshold for det in self.detections
+            det.confidence >= threshold for det in self.detections
         )
 
 

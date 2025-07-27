@@ -5,6 +5,7 @@ import queue
 
 
 from shared.image_data import ImageWithMeta
+from shared.events import EventType
 
 upload_router  = APIRouter()
 
@@ -20,6 +21,7 @@ async def upload_image(request: Request, file: UploadFile = File(...)):
     # Đẩy ảnh vào queue
     try:
         request.app.state.shared_queue.image_queue.put_nowait(img)
+        request.app.state.shared_event.set(EventType.IMAGE_RECEIVED)
         return {"status": "Image added to queue"}
     except queue.Full:
         return {"status": "Queue is full. Try again later."}
