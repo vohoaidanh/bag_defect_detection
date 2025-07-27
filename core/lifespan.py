@@ -9,29 +9,34 @@ from services.yolo_processor import YoloProcessor
 from services.detection_result_handler import DetectionResultHandler
 from services.hardware.modbus_io import ModbusActuator
 from services import detection_result_handler
+from shared.events import SharedEvents
+from shared.pipeline_queue import PipelineQueues
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
-    trigger_queue = queue.Queue(maxsize=1)
-    image_queue = queue.Queue(maxsize=2)
-    result_queue = queue.Queue(maxsize=2)
-    last_result_queue = queue.Queue(maxsize=1)
+    shared_queue = PipelineQueues()
+    shared_event = SharedEvents()
 
-    camera_controller = CameraController(image_queue=image_queue)
-    detector = YoloProcessor(image_queue=image_queue, result_queue=result_queue, trigger_queue=trigger_queue)
+    camera_controller = CameraController(shared_queue=shared_queue,
+                                         shared_event=shared_event)
+    
+    detector = YoloProcessor(shared_queue=shared_queue,
+                             shared_event=shared_event)
+    
     detection_hander = DetectionResultHandler(
-        result_queue=result_queue,
-        trigger_queue=trigger_queue,
+        shared_queue=shared_queue,
+        shared_event=shared_event,
         actuator=ModbusActuator("192.168.1.100"),
         n_delay=3
     )
+    detector.start()
     detection_hander.start()
 
     app.state.camera_controller = camera_controller
     app.state.detector = detector
     app.state.detection_hander = detection_hander
-    app.state.image_queue = image_queue  # để endpoint upload dùng được
+    app.state.shared_queue = shared_queue  # để endpoint upload dùng được
 
     yield
 

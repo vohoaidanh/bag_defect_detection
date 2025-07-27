@@ -1,5 +1,7 @@
 venv/
 delete/
+yolov8n_openvino_model/
+**/models/
 # Python
 __pycache__/
 *.pyc

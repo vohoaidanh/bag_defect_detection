@@ -19,7 +19,7 @@ async def upload_image(request: Request, file: UploadFile = File(...)):
 
     # Đẩy ảnh vào queue
     try:
-        request.app.state.image_queue.put_nowait(img)
+        request.app.state.shared_queue.image_queue.put_nowait(img)
         return {"status": "Image added to queue"}
     except queue.Full:
         return {"status": "Queue is full. Try again later."}

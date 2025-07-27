@@ -1,6 +1,9 @@
+#!/home/vision/projects/defect_detection/venv/bin/python
+
+
 # run_camera_yolo.py
 # from camera_controller import CameraController
-from camera_simulate import CameraSimulator
+from services.camera_simulate import CameraSimulator
 from yolo_processor import YoloProcessor
 import queue
 import time

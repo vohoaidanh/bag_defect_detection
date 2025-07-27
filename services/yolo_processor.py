@@ -7,13 +7,16 @@ from shared.utils import parse_yolo_result
 from services.schemas.detection_result import DetectionResult
 from shared.image_data import ImageWithMeta
 from shared.utils import safe_queue_put
-
+from shared.events import SharedEvents, EventType
+from shared.pipeline_queue import PipelineQueues
+import time
 from core.config import settings
 
 
 class YoloProcessor:
     _instance = None
     _lock = threading.Lock()  # Đảm bảo thread-safe
+    
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
@@ -22,17 +25,15 @@ class YoloProcessor:
                     cls._instance = super(YoloProcessor, cls).__new__(cls)
         return cls._instance
 
-    def __init__(self, image_queue: queue.Queue, result_queue: queue.Queue, trigger_queue: queue.Queue):
+    def __init__(self, shared_queue:PipelineQueues, shared_event: SharedEvents):
         if hasattr(self, "_initialized") and self._initialized:
             return  # Không khởi tạo lại nếu đã init rồi
 
-        self.image_queue = image_queue
-        self.result_queue = result_queue
-        self.trigger_queue = trigger_queue
+        self.image_queue = shared_queue.image_queue
+        self.result_queue = shared_queue.result_queue
+        self.shared_event = shared_event
         self.model = YoloDetector(model_path=settings.MODEL_PATH)
-        self.running = True
-        self.thread = threading.Thread(target=self._run, daemon=True)
-        self.thread.start()
+        self.running = False
         self._initialized = True
 
     def _run(self):
@@ -50,14 +51,27 @@ class YoloProcessor:
                 detection_result: DetectionResult = parse_yolo_result(result)
                 detection_result.id = data_input.id
                 safe_queue_put(self.result_queue, detection_result, DetectionResult)
-                safe_queue_put(self.trigger_queue, True, type(True))
+                self.shared_event.set(event_type=EventType.DETECTION_DONE)
+                
                 # for r in results:
                 #     print("Detected boxes:", r.boxes.xyxy)
 
             except queue.Empty:
+                time.sleep(0.01)
                 continue
             except Exception as e:
                 print("Error in YOLO processing:", e)
+
+    def start(self):
+        if hasattr(self, 'thread') and self.thread.is_alive():
+            print("[WARN] YoloProcessor thread already running. Skip start.")
+            return
+
+        self.running = True
+        self.thread = threading.Thread(target=self._run, daemon=True, name="YoloProcessorThread")
+        self.thread.start()
+        self._initialized = True
+        print("[INFO] YoloProcessor thread started.")
 
     def stop(self):
         self.running = False

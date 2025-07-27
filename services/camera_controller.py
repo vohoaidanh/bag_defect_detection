@@ -2,6 +2,8 @@ import imagingcontrol4 as ic4
 import threading
 import time
 from services.camera_listener import Listener
+from shared.events import SharedEvents
+from shared.pipeline_queue import PipelineQueues
 # from yolo_processor import YoloProcessor
 
 class CameraController:
@@ -16,15 +18,16 @@ class CameraController:
                     cls._instance._initialized = False
         return cls._instance
 
-    def __init__(self, image_queue):
+    def __init__(self, shared_queue:PipelineQueues, shared_event:SharedEvents):
         if self._initialized:
             return
         
         self._initialized = True
-        self.image_queue = image_queue
         self.stop_trigger = True
+        self.shared_event = shared_event
+        self.shared_queue = shared_queue
         ic4.Library.init()
-        self.listener = Listener(image_queue=self.image_queue)
+        self.listener = Listener(shared_queue=self.shared_queue, shared_event=self.shared_event)
         self.sink = ic4.QueueSink(self.listener)
         # self.sink = ic4.SnapSink(self.listener)
   

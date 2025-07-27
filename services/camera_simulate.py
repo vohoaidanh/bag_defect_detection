@@ -1,3 +1,5 @@
+#!/home/vision/projects/defect_detection/venv/bin/python
+
 import threading
 import time
 import queue
