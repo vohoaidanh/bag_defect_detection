@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Vision Control Panel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      padding-top: 60px;
+      background-color: #f0f2f5;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .card {
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    .navbar {
+      background-color: #1e293b;
+    }
+    .navbar-brand {
+      color: #ffffff;
+      font-weight: bold;
+    }
+    .navbar-brand:hover {
+      color: #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar fixed-top navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#"><i class="bi bi-eye"></i> AI Vision Control Panel</a>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+
+    <!-- Live Camera Feed -->
+    <div class="card mb-4">
+      <div class="card-header bg-dark text-white">
+        <i class="bi bi-camera-video"></i> Camera & Phân tích trực tiếp
+      </div>
+      <div class="card-body">
+        <img src="/static/placeholder_camera.jpg" alt="Live Camera Feed" class="img-fluid rounded mb-3">
+        <p class="text-muted">Hình ảnh từ camera sẽ hiển thị tại đây.</p>
+        <button id="captureButton" class="btn btn-info"><i class="bi bi-camera"></i> Chụp ảnh</button>
+        <div id="captureStatus" class="mt-2 text-info" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- Upload Image -->
+    <div class="card mb-4">
+      <div class="card-header bg-secondary text-white">
+        <i class="bi bi-upload"></i> Tải ảnh lên để xử lý
+      </div>
+      <div class="card-body">
+        <form id="uploadForm" enctype="multipart/form-data" method="post" action="/upload/image">
+          <input class="form-control mb-3" type="file" id="imageFile" name="file" accept="image/*" required>
+          <button type="submit" class="btn btn-primary"><i class="bi bi-cpu"></i> Upload & Xử lý</button>
+        </form>
+        <div id="uploadStatus" class="mt-2 text-success" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- AI Settings -->
+    <div class="card mb-4">
+      <div class="card-header bg-success text-white">
+        <i class="bi bi-sliders"></i> Cài đặt AI
+      </div>
+      <div class="card-body">
+        <form>
+          <label for="detectionThreshold" class="form-label">Ngưỡng phát hiện lỗi</label>
+          <input type="range" class="form-range mb-3" id="detectionThreshold" min="0" max="1" step="0.05">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="enableAnalytics">
+            <label class="form-check-label" for="enableAnalytics">Bật phân tích dữ liệu</label>
+          </div>
+          <button type="submit" class="btn btn-success mt-3"><i class="bi bi-check2-circle"></i> Áp dụng</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Processed Result -->
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        <i class="bi bi-image-alt"></i> Kết quả xử lý
+      </div>
+      <div class="card-body">
+        <img src="/static/placeholder_processed.jpg" alt="Processed Output" class="img-fluid rounded mb-3">
+        <p class="text-muted">Ảnh sau xử lý AI sẽ hiển thị ở đây.</p>
+        <table class="table table-bordered">
+          <thead class="table-light">
+            <tr>
+              <th>Thời gian</th>
+              <th>Mã sản phẩm</th>
+              <th>Trạng thái</th>
+              <th>Chi tiết lỗi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>27-07-2025 21:40</td>
+              <td>#SP00124</td>
+              <td class="text-danger">❌ Lỗi</td>
+              <td>Trầy xước bề mặt</td>
+            </tr>
+            <tr>
+              <td>27-07-2025 21:45</td>
+              <td>#SP00125</td>
+              <td class="text-success">✅ Đạt</td>
+              <td>---</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bootstrap & JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Upload handler
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var formData = new FormData(this);
+      var statusDiv = document.getElementById('uploadStatus');
+      statusDiv.style.display = 'none';
+
+      fetch('/upload/image', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        statusDiv.textContent = data.status || 'Upload thành công';
+        statusDiv.style.display = 'block';
+      })
+      .catch(() => {
+        statusDiv.textContent = 'Upload thất bại';
+        statusDiv.style.display = 'block';
+      });
+    });
+
+    // Capture handler
+    document.getElementById('captureButton').addEventListener('click', function() {
+      var captureStatusDiv = document.getElementById('captureStatus');
+      captureStatusDiv.style.display = 'none';
+      captureStatusDiv.textContent = 'Đang gửi lệnh chụp ảnh...';
+      captureStatusDiv.style.display = 'block';
+
+      fetch('/camera/capture', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        captureStatusDiv.textContent = data.message || 'Đã chụp ảnh!';
+        captureStatusDiv.className = 'mt-2 text-success';
+      })
+      .catch(() => {
+        captureStatusDiv.textContent = 'Không thể gửi lệnh.';
+        captureStatusDiv.className = 'mt-2 text-danger';
+      });
+    });
+  </script>
+</body>
+</html>

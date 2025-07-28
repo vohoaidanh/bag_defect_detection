@@ -14,14 +14,15 @@ class DetectionResultHandler:
                     shared_event: SharedEvents,
                     actuator: ActuatorInterface=\
                         ModbusActuator("192.168.1.100"),
-                    n_delay: int = 3):
+                    n_delay: int = 3,
+                    ws_manager=None):
 
         """
         result_queue: kết quả phát hiện từ YOLO.
         n_delay: số lượng trigger cần chờ trước khi kích hoạt loại bỏ.
         """
         self._lock = threading.Lock()
-
+        self.ws_manager = ws_manager
         self.result_queue = shared_queue.result_queue
         self.shared_event = shared_event
 
@@ -48,6 +49,8 @@ class DetectionResultHandler:
                 if result.is_defect(threshold=settings.CONFIDENCE_THRESHOLD):
                     print(f"[DetectionResultHandler] Detected defect, scheduling removal after {self.n_delay} triggers.")
                     self.removal_queue.put(self.n_delay)
+                    self.ws_manager.broadcast_from_thread(result.image_with_boxes)
+
             except queue.Empty:
                 time.sleep(0.01)  # Tránh busy-wait
 

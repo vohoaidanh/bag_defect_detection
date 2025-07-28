@@ -11,10 +11,14 @@ from services.hardware.modbus_io import ModbusActuator
 from services import detection_result_handler
 from shared.events import SharedEvents
 from shared.pipeline_queue import PipelineQueues
+from shared.websocket_manager import WebSocketManager
+import asyncio
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
+    ws_manager = WebSocketManager()
+    ws_manager.loop=asyncio.get_running_loop()
     shared_queue = PipelineQueues()
     shared_event = SharedEvents()
 
@@ -28,8 +32,12 @@ async def lifespan(app: FastAPI):
         shared_queue=shared_queue,
         shared_event=shared_event,
         actuator=ModbusActuator("192.168.1.100"),
-        n_delay=3
+        n_delay=3,
+        ws_manager = ws_manager
     )
+
+    
+
     
     detector.start()
     detection_hander.start()
@@ -39,6 +47,8 @@ async def lifespan(app: FastAPI):
     app.state.detection_hander = detection_hander
     app.state.shared_queue = shared_queue  
     app.state.shared_event = shared_event
+    app.state.ws_manager = ws_manager
+
     yield
 
     print("Stopping camera thread...")
