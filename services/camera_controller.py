@@ -77,7 +77,7 @@ class CameraController:
             # self.grabber.device_property_map.set_value(ic4.PropId.HEIGHT, 1944)
             self.grabber.device_property_map.try_set_value(ic4.PropId.PIXEL_FORMAT, ic4.PixelFormat.BayerGR8)
             self.grabber.device_property_map.set_value(ic4.PropId.EXPOSURE_AUTO, "Off")
-            self.grabber.device_property_map.set_value(ic4.PropId.EXPOSURE_TIME, 1000)
+            self.grabber.device_property_map.set_value(ic4.PropId.EXPOSURE_TIME, 3000)
             # self.grabber.device_property_map.try_set_value(ic4.PropId.USER_SET_SELECTOR, "Default")
             self.grabber.device_property_map.set_value(ic4.PropId.TRIGGER_MODE, "On")
             print(self.grabber.device_property_map)

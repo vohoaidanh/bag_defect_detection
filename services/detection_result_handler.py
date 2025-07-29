@@ -46,11 +46,11 @@ class DetectionResultHandler:
         while self.running:
             try:
                 result: DetectionResult = self.result_queue.get_nowait()
+                self.ws_manager.broadcast_from_thread(result.image_with_boxes)
                 if result.is_defect(threshold=settings.CONFIDENCE_THRESHOLD):
                     print(f"[DetectionResultHandler] Detected defect, scheduling removal after {self.n_delay} triggers.")
                     self.removal_queue.put(self.n_delay)
-                    self.ws_manager.broadcast_from_thread(result.image_with_boxes)
-
+                    
             except queue.Empty:
                 time.sleep(0.01)  # Tránh busy-wait
 

@@ -34,20 +34,30 @@
 <body>
   <div class="container">
     <h1 class="text-center mb-5">🛠️ AI Defect Detection Dashboard</h1>
-    
+     <!-- Output Section -->
+    <div class="row mt-5">
+      <div class="col-12">
+        <div class="card p-3">
+          <h5 class="section-title mb-3">📊 Processed Output</h5>
+          <img src="/static/placeholder_processed.jpg" class="img-preview w-100" alt="Processed Output" />
+          <img id="live-img" width="640" />
+          <p class="text-muted small mt-2">Detected defects will be highlighted in red bounding boxes.</p>
+        </div>
+      </div>
+    </div>
     <div class="row g-4">
       <!-- Live Feed -->
       <div class="col-md-8">
         <div class="card p-3">
-          <h5 class="section-title mb-3">📸 Live Camera Feed</h5>
+          <h5 class="section-title mb-3">Live Camera Feed</h5>
           <img src="/static/placeholder_camera.jpg" class="img-preview w-100" alt="Live Feed" />
           <button class="btn btn-primary mt-3" id="captureBtn">Capture Image</button>
-          <p class="text-muted small mt-2">Live feed updates automatically every 5s. Press Capture to analyze manually.</p>
+          <p class="text-muted small mt-2" id="statusText">Live feed updates automatically every 5s. Press Capture to analyze manually.</p>
         </div>
 
         <!-- Upload Section -->
         <div class="card p-3 mt-4">
-          <h5 class="section-title mb-3">📁 Upload Product Image</h5>
+          <h5 class="section-title mb-3">Upload Product Image</h5>
           <form id="uploadForm" enctype="multipart/form-data" method="post" action="/upload/image">
             <input type="file" class="form-control mb-3" name="file" accept="image/*" required>
             <button type="submit" class="btn btn-success">Upload & Analyze</button>
@@ -59,7 +69,7 @@
       <!-- AI Settings Panel -->
       <div class="col-md-4">
         <div class="card p-3">
-          <h5 class="section-title mb-3">⚙️ AI Configuration</h5>
+          <h5 class="section-title mb-3">AI Configuration</h5>
           <form>
             <label for="confidenceRange" class="form-label">Detection Confidence Threshold</label>
             <input type="range" class="form-range" min="0.3" max="0.99" step="0.01" id="confidenceRange" />
@@ -81,17 +91,7 @@
       </div>
     </div>
 
-    <!-- Output Section -->
-    <div class="row mt-5">
-      <div class="col-12">
-        <div class="card p-3">
-          <h5 class="section-title mb-3">📊 Processed Output</h5>
-          <img src="/static/placeholder_processed.jpg" class="img-preview w-100" alt="Processed Output" />
-          <img id="live-img" width="640" />
-          <p class="text-muted small mt-2">Detected defects will be highlighted in red bounding boxes.</p>
-        </div>
-      </div>
-    </div>
+   
   </div>
 
   <!-- Bootstrap JS -->
@@ -122,15 +122,19 @@
         method: "POST",
       })
         .then((res) => res.json())
-        .then((data) => alert(data.message || "Image captured"))
-        .catch((err) => alert("Failed to capture image"));
+        .then((data) => {
+            document.getElementById("statusText").textContent = data.message || "Image captured successfully.";
+        })
+        .catch((err) => {
+            document.getElementById("statusText").textContent = "Failed to capture image.";
+        });
     });
   </script>
   <script>
     const ws = new WebSocket("ws://localhost:8000/ws");  // hoặc wss nếu dùng HTTPS
 
     ws.onopen = function () {
-      console.log("✅ Connected to server");
+      console.log("Connected to server");
       // Gửi dữ liệu nếu muốn (tùy use case)
       // ws.send("Hello from client");
     };
@@ -145,11 +149,11 @@
     };
 
     ws.onclose = function () {
-      console.log("❌ WebSocket closed");
+      console.log("WebSocket closed");
     };
 
     ws.onerror = function (err) {
-      console.error("⚠️ WebSocket error:", err);
+      console.error("WebSocket error:", err);
     };
   </script>
 </body>
