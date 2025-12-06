@@ -51,8 +51,8 @@ class YoloProcessor:
                 detection_result.id = data_input.id
                 safe_queue_put(self.result_queue, detection_result, DetectionResult)
                 safe_queue_put(self.trigger_queue, True, type(True))
-                # for r in results:
-                #     print("Detected boxes:", r.boxes.xyxy)
+                for r in result:
+                    print("Detected boxes:", r.boxes.xyxy)
 
             except queue.Empty:
                 continue

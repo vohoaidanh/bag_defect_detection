@@ -33,7 +33,7 @@ async def lifespan(app: FastAPI):
     app.state.image_queue = image_queue  # để endpoint upload dùng được
 
     yield
-
+ 
     print("Stopping camera thread...")
     camera_controller.stop()
     detector.stop()
